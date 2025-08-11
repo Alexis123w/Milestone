@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static Milestone.Board;
 
 namespace Milestone
 {
@@ -30,7 +31,6 @@ namespace Milestone
 
         private void InitializeBoard()
         {
-            
             for (int r = 0; r < Size; r++)
             {
                 for (int c = 0; c < Size; c++)
@@ -45,21 +45,17 @@ namespace Milestone
 
             StartTime = DateTime.Now;
         }
-        // used when player selects a cell and chooses to play the reward
-        public void UseSpecialBonus()
-        {
-            // Not implemented now
-        }
-        // use after game is over to calculate final score
-        public int DetermineFinalScore() { return 0; }
 
-        // helper function to determine if a cell is out of bounds
+        public Cell GetCell(int row, int col)
+        {
+            return Cells[row, col];
+        }
+
         private bool IsCellOnBoard(int row, int col)
         {
             return row >= 0 && row < Size && col >= 0 && col < Size;
         }
 
-        // Use during setup to calculate the number of bomb neighbors for each cell
         private void CalculateNumberOfBombNeighbors()
         {
             for (int r = 0; r < Size; r++)
@@ -71,12 +67,10 @@ namespace Milestone
             }
         }
 
-        // helper function to determine the number of bumb neighbors for a cell
         private int GetNumberOfBombNeighbors(int row, int col)
         {
             if (Cells[row, col].IsBomb)
             {
-                // Convention: bomb cells have neighbor count = 9
                 return 9;
             }
 
@@ -94,7 +88,6 @@ namespace Milestone
             return bombCount;
         }
 
-        // use during setup to place bombs on the board
         private void SetupBombs()
         {
             int totalCells = Size * Size;
@@ -114,13 +107,11 @@ namespace Milestone
             }
         }
 
-        // use during setup to place rewards on the board
         private void SetupRewards()
         {
-            // Example: randomly assign some special rewards to a few cells
-            int totalRewards = Size; // just an example number
-
+            int totalRewards = Size; // Example: number of rewards
             int rewardsPlaced = 0;
+
             while (rewardsPlaced < totalRewards)
             {
                 int r = random.Next(Size);
@@ -128,7 +119,6 @@ namespace Milestone
 
                 if (Cells[r, c].HasSpecialReward == Cell.SpecialRewardType.None && !Cells[r, c].IsBomb)
                 {
-                    // Assign a random reward type except None
                     Array rewardValues = Enum.GetValues(typeof(Cell.SpecialRewardType));
                     Cell.SpecialRewardType randomReward = Cell.SpecialRewardType.None;
 
@@ -143,12 +133,23 @@ namespace Milestone
             }
         }
 
-        // use every turn to determine the current game state
         public GameStatus DetermineGameState()
         {
-            return GameStatus.InProgress;
-        }
+            foreach (var cell in Cells)
+            {
+                if (cell.IsBomb && cell.IsVisited)
+                    return GameStatus.Lost;
+            }
 
+            bool allClearCellsVisitedOrFlagged = true;
+            foreach (var cell in Cells)
+            {
+                if (!cell.IsBomb && !cell.IsVisited && !cell.IsFlagged)
+                    allClearCellsVisitedOrFlagged = false;
+            }
+
+            return allClearCellsVisitedOrFlagged ? GameStatus.Won : GameStatus.InProgress;
+        }
     }
 }
 
