@@ -26,6 +26,24 @@ namespace Milestone
             BombSquad,
             Undo
         }
+        public string DisplayValue
+        {
+            get
+            {
+                if (!IsRevealed)
+                {
+                    if (IsFlagged)
+                        return "F";      // flagged cell
+                    return "";            // unrevealed
+                }
+                else if (IsBomb)
+                    return "B";           // bomb
+                else if (NumberOfBombNeighbors > 0)
+                    return NumberOfBombNeighbors.ToString(); // show adjacent bombs
+                else
+                    return " ";           // empty revealed
+            }
+        }
 
         public SpecialRewardType HasSpecialReward { get; set; } = SpecialRewardType.None;
 
